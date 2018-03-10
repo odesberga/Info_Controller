@@ -27,6 +27,7 @@ SoftwareSerial mySeria1(14, 15);
 SensorHandler SH(3);
 SerialCommunication SC(mySeria1,CHIPADDRESS,9);
 SerialConsole SCLI(Serial);
+
 int i=0;
 int16_t val=0;
 int lastval=0;
@@ -49,7 +50,7 @@ void setup() {
     //lcd.setBacklightPin(BACKLIGHT_PIN,POSITIVE);
     //lcd.setBacklight(HIGH);
     //Serial.begin(9600);
-    SCLI.begin(9600);
+    SCLI.begin(9600,SH);
     SC.begin();
 
     Serial.println("Initializing SD card...");
