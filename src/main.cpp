@@ -50,7 +50,7 @@ void setup() {
     //lcd.setBacklightPin(BACKLIGHT_PIN,POSITIVE);
     //lcd.setBacklight(HIGH);
     //Serial.begin(9600);
-    SCLI.begin(9600,SH);
+    SCLI.begin(9600);
     SC.begin();
 
     Serial.println("Initializing SD card...");
@@ -67,7 +67,7 @@ void setup() {
         }
     Ethernet.begin(mac, ip);  // initialize Ethernet device
     server.begin();
-    fillSensorsFromFile();
+    //fillSensorsFromFile();
     showsensor(2,1);
 }
 
@@ -87,7 +87,7 @@ void loop() {
         lcd.print(SC.resvData.Function);
         lcd.print(SC.resvData.Value);
     };
-
+SCLI.refresh(SH);
 }
 
 void fillSensorsFromFile() {
@@ -95,7 +95,7 @@ void fillSensorsFromFile() {
     char a[60];
     RuleFile = SD.open("SENSORS");
            while (RuleFile.available()) {
-          String aString = RuleFile.readStringUntil('#');
+          String aString = RuleFile.readStringUntil('\n');
           aString.toCharArray(a,60);
           SH.add(a);
            }
@@ -106,7 +106,7 @@ void showsensor(uint8_t address,uint8_t func){
     SensorData aSensordata;
 //    aSensordata = SH.getSensor(address,func);
     Serial.println("Sensor:");
-
+    Serial.println(String(SH.sensorCount()));
     Serial.println("Name Address Function Threshold ThresholdPosNeg Alarmlevel PrintToScreen ForwardSensorAddress ForwardSensorFunction");
 
     for(int i = 0;i<SH.sensorCount();i++){
