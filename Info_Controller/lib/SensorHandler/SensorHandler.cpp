@@ -49,7 +49,7 @@ void SensorHandler::add(char * SensorStr){
                         _SensorData[j].ThresholdPosNeg = SensorStr[i];
                         break;
                     case 5:
-                        _SensorData[j].Alarmlevel = SensorStr[i];
+                        _SensorData[j].Valtype = SensorStr[i];
                         break;
                     case 6:
                         _SensorData[j].PrintToScreen = SensorStr[i];
@@ -71,9 +71,10 @@ void SensorHandler::add(char * SensorStr){
 }
 
 
-SensorData SensorHandler::getSensor(uint8_t Address,uint8_t Function){
+SensorData SensorHandler::getSensor(char * sensorname,uint8_t Address,uint8_t Function,int16_t CurrValue){
 for (int j =0; j< SensorCount+1;j++){
-    if ((_SensorData[j].SensorAddress==Address) && (_SensorData[j].SensorFunction==Function)){
+    if ((_SensorData[j].SensorName==sensorname) && (_SensorData[j].SensorAddress==Address) && (_SensorData[j].SensorFunction==Function)){
+         _SensorData[j].LastValue=CurrValue;
         return _SensorData[j];
         break;}
     }
@@ -84,6 +85,7 @@ void SensorHandler::clearEEPROM(int slot){
     int c=EEslotlength;
     c++;
     c=c*slot;
+
     for(int i =c;i<= c+EEslotlength;i++){
             EEPROM.write(i, 0);
     }
@@ -220,3 +222,56 @@ bool SensorHandler::savetosd(char* filename){
        return true;
    } else {return false;};
 }
+bool SensorHandler::deletefromsd(char* filename){
+    if (SD.exists(filename)){
+        SD.remove(filename);
+        return true;
+}
+else {
+    Serial.print(filename);
+    Serial.println(F(" doesn't exist."));
+    return false;
+}
+
+};
+
+bool SensorHandler::lssd(){
+    File root;
+    root = SD.open("/");
+      listsd(root, 0);
+}
+
+bool SensorHandler::listsd(File dir, int numTabs){
+    dir.rewindDirectory();
+    while(true) {
+           File entry =  dir.openNextFile();
+           if (! entry) {
+             break;
+           }
+           for (uint8_t i=0; i<numTabs; i++) {
+             Serial.print('\t');
+           }
+           Serial.print(entry.name());
+
+           Serial.print("\t\t");
+           Serial.println(entry.size(), DEC);
+
+           entry.close();
+     }
+};
+bool SensorHandler::catfilesd(char* filename){
+    File RuleFile;
+    if (!SD.exists(filename)) {
+        return false;
+    } else {
+         Serial.println(filename);
+         Serial.println();
+        RuleFile = SD.open(filename);
+          while (RuleFile.available()) {
+             String aString = RuleFile.readStringUntil('\n');
+             Serial.println(aString);
+          }
+          RuleFile.close();
+          return true;
+    }
+};

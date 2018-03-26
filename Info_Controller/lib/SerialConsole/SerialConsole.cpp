@@ -1,5 +1,6 @@
 #include <SerialConsole.h>
 #include <SensorHandler.h>
+#include <EEPROM.h>
 
 /////////////////////////////////////// info text //////////////////////////////////////
 
@@ -19,7 +20,7 @@ const char icmd12[]  = "Error";
 const char icmd13[]  = "Success";
 const char icmd14[]  = "deleted";
 const char icmd15[]  = "added";
-const char icmd16[]  = "         ";
+const char icmd16  = '\t';
 const char icmd17[]  = "Save";
 const char icmd18[]  = "file";
 const char icmd19[]  = "?";
@@ -48,9 +49,9 @@ const char *infcmd_lst[] = {
 #define txt_qstn 19
 
 /////////////////////////////////// Commands //////////////////////////////
-const char cmd1[]  ="sensor";
-const char cmd2[]  ="alarmnumber";
-const char cmd3[]  ="changeip";
+const char cmd1[]  ="module";
+const char cmd2[]  ="file";
+const char cmd3[]  ="ip";
 const char cmd4[]  ="debug";
 const char cmd5[]  ="reboot";
 const char cmd6[]  ="help";
@@ -69,21 +70,22 @@ const char subcmd5[]  ="clear";
 const char subcmd6[]  ="show";
 const char subcmd7[]  ="loadfromsd";
 const char subcmd8[]  ="savetosd";
+const char subcmd9[]  ="help";
 
 const char*  subcmd_lst1[] = {
-    subcmd1,subcmd2,subcmd3,subcmd4,subcmd5,subcmd6,subcmd7,subcmd8
+    subcmd1,subcmd2,subcmd3,subcmd4,subcmd5,subcmd6,subcmd7,subcmd8,subcmd9
 };
 #define subcmd_count 8
 
 const char sensAddMenu_string_0[] PROGMEM = "Enter Name";
 const char sensAddMenu_string_1[] PROGMEM = "Enter Address";
 const char sensAddMenu_string_2[] PROGMEM = "Enter Function";
-const char sensAddMenu_string_3[] PROGMEM = "Enter Threshold";
-const char sensAddMenu_string_4[] PROGMEM = "Enter Threshold Alarm Over/Under [+/-]";
-const char sensAddMenu_string_5[] PROGMEM = "Enter Alarm level";
+const char sensAddMenu_string_3[] PROGMEM = "Enter forwarding threshold";
+const char sensAddMenu_string_4[] PROGMEM = "Enter forwarding threshold Over/Under [+/-]";
+const char sensAddMenu_string_5[] PROGMEM = "Enter Value type eg V for Volt, C for celsius or P for pascal";
 const char sensAddMenu_string_6[] PROGMEM = "Print to screen [y/n]";
-const char sensAddMenu_string_7[] PROGMEM = "Enter address to forwarding sensor [0-100] 0 = n/a";
-const char sensAddMenu_string_8[] PROGMEM = "Enter function on forwarding sensor 0 = n/a";
+const char sensAddMenu_string_7[] PROGMEM = "Enter address to forwarding module [0-100] 0 = n/a";
+const char sensAddMenu_string_8[] PROGMEM = "Enter function on forwarding function 0 = n/a";
 const char sensAddMenu_string_9[] PROGMEM = "";
 const char* const sensAddMenu[] PROGMEM = {
 sensAddMenu_string_0,sensAddMenu_string_1,sensAddMenu_string_2,sensAddMenu_string_3,sensAddMenu_string_4,sensAddMenu_string_5,
@@ -93,22 +95,22 @@ sensAddMenu_string_6,sensAddMenu_string_7,sensAddMenu_string_8,sensAddMenu_strin
 
 
 
-const char HelpMenu_string_0[] PROGMEM = "Help Menu!";
-const char HelpMenu_string_1[] PROGMEM = "Sensors:";
-const char HelpMenu_string_2[] PROGMEM = "sensor list :List Sensors";
-const char HelpMenu_string_3[] PROGMEM = "sensor del [sensorname] :Remove Sensor.";
-const char HelpMenu_string_4[] PROGMEM = "sensor add [sensorname] :add new sensor (wizard)";
-const char HelpMenu_string_41[] PROGMEM = "sensor clear :remove all sensors";
-const char HelpMenu_string_5[] PROGMEM = "";
-const char HelpMenu_string_6[] PROGMEM = "Alarms:";
-const char HelpMenu_string_7[] PROGMEM = "alarmnumber list :List telephone numbers";
-const char HelpMenu_string_8[] PROGMEM = "alarmnumber add [alarm level] [phone number] :Add a telephone number to alarm level";
-const char HelpMenu_string_9[] PROGMEM = "alarmnumber del [alarm level] [phone number] :Delete a telephone number from alarm level";
-const char HelpMenu_string_10[] PROGMEM = "setalarm [sensor] [value] [Pos/Neg] :Set sensor error Threshold value + -";
-const char HelpMenu_string_11[] PROGMEM = "";
-const char HelpMenu_string_12[] PROGMEM = "changeip [ipnumber]   :Change IP (If using ethernet shield)";
-const char HelpMenu_string_13[] PROGMEM = "reboot : Restart the system";
-const char HelpMenu_string_14[] PROGMEM = "debug [on/off]   :start / stop serial debugging)";
+const char HelpMenu_string_0[] PROGMEM = "Help!";
+const char HelpMenu_string_1[] PROGMEM = "module list                    :list modules";
+const char HelpMenu_string_2[] PROGMEM = "module del [modulename]        :delete module";
+const char HelpMenu_string_3[] PROGMEM = "module add                     :add new module (wizard)";
+const char HelpMenu_string_4[] PROGMEM = "module savetosd [filename]     :save modules to file ";
+const char HelpMenu_string_41[] PROGMEM = "module loadfromsd [filename]   :load modules from file";
+const char HelpMenu_string_5[] PROGMEM = "module clear                   :clear all modules";
+const char HelpMenu_string_6[] PROGMEM = "file list                      :list files on SD";
+const char HelpMenu_string_7[] PROGMEM = "file show [filename]           :show file content";
+const char HelpMenu_string_8[] PROGMEM = "file del [filename]            :delete file from SD";
+const char HelpMenu_string_9[] PROGMEM = "eeprom list                    :list values saved in eeprom";
+const char HelpMenu_string_10[] PROGMEM = "ip set [ip Address]            :Set IP address";
+const char HelpMenu_string_11[] PROGMEM = "ip show                        :show current IP address";
+const char HelpMenu_string_12[] PROGMEM = "";
+const char HelpMenu_string_13[] PROGMEM = "reboot                         :restart the system";
+const char HelpMenu_string_14[] PROGMEM = "help                           :show help";
 const char* const menu_help[] PROGMEM = {
     HelpMenu_string_0, HelpMenu_string_1, HelpMenu_string_2, HelpMenu_string_3, HelpMenu_string_4, HelpMenu_string_41, HelpMenu_string_5
     , HelpMenu_string_6, HelpMenu_string_7, HelpMenu_string_8, HelpMenu_string_9, HelpMenu_string_10, HelpMenu_string_11
@@ -128,7 +130,7 @@ SerialConsole::SerialConsole(HardwareSerial& serial): _Serial(serial){
 }
 void SerialConsole::begin(int baud){
     _Serial.begin(baud);
-    _Serial.println("init");
+    mnuHelp();
 }
 
 void SerialConsole::putPrgMemTextInBuffer(int arrIdx,char *arr[]){
@@ -193,7 +195,17 @@ bool Found=false;
 }
 if(!Found){return -1;};
 }
-
+void SerialConsole::mnuReboot(){
+    _Serial.print((char*)infcmd_lst[7]);
+    _Serial.print((char*)infcmd_lst[txt_space]);
+    _Serial.print((char*)infcmd_lst[22]);
+    _Serial.print((char*)infcmd_lst[19]);
+    _Serial.print((char*)infcmd_lst[txt_space]);
+    _Serial.println((char*)infcmd_lst[20]);
+        if(ConfirmMenu(0)){
+        resetFunc();
+        }
+}
 void SerialConsole::parseCommand(){
 getCommand(0);
 //_Serial.println((char*)cmd);
@@ -203,6 +215,15 @@ int cmdidx=getCommandindex(cmd_lst,cmd_lst_count);
         switch (cmdidx) {
             case 0:
                 mnuSensor();
+                break;
+            case 1:
+                mnuFile();
+                break;
+            case 2:
+                mnuIP();
+                break;
+            case 4:
+                mnuReboot();
                 break;
             case 5:
                 mnuHelp();
@@ -216,6 +237,118 @@ int cmdidx=getCommandindex(cmd_lst,cmd_lst_count);
     _Serial.println((char*)infcmd_lst[1]);
     }
 }
+
+
+void SerialConsole::mnuIP(){
+    switch (getSubCommandindex(1)) {
+
+        case 3:
+            mnuIPset();
+            break;
+
+        case 5:
+            mnuIPshow();
+            break;
+        default:
+            _Serial.println((char*)infcmd_lst[1]);
+            _Serial.println((char*)subcmd_lst1[3]);
+            _Serial.println((char*)subcmd_lst1[5]);
+
+    }
+}
+
+void SerialConsole::mnuIPshow(){
+    int startidx=30;
+    startidx++;
+    startidx=startidx*101;
+    startidx++;
+    int i=0;
+    char b;
+    _Serial.println();
+    while(true){
+        b=EEPROM.read(startidx+i);
+        if(b=='\0'){
+            break;
+        } else {
+
+            _Serial.print(b) ;
+            i++;
+        }
+    }
+}
+void SerialConsole::mnuIPset(){
+    getCommand(2);
+    int startidx=30;
+    startidx++;
+    startidx=startidx*101;
+    startidx++;
+
+        int i=0;
+        char b;
+        while(true){
+            b=cmd[i];
+            if(b=='\0'){
+                break;
+            } else {
+                EEPROM.write(startidx+i,b);
+                EEPROM.write(startidx+i+1,'\0');
+                i++;
+            }
+        }
+        _Serial.print((char*)cmd);
+        _Serial.println();
+        _Serial.print((char*)infcmd_lst[13]);
+        _Serial.println((char*)infcmd_lst[30]);
+        txt_reboot();
+
+}
+
+
+void SerialConsole::mnuFile(){
+    switch (getSubCommandindex(1)) {
+
+        case 1:
+            mnuFiledel();
+            break;
+        case 2:
+            mnuFilelist();
+            break;
+        case 5:
+            mnuFileshow();
+            break;
+        default:
+            _Serial.println((char*)infcmd_lst[1]);
+            _Serial.println((char*)subcmd_lst1[1]);
+            _Serial.println((char*)subcmd_lst1[2]);
+            _Serial.println((char*)subcmd_lst1[5]);
+    }
+}
+void SerialConsole::mnuFilelist(){
+    _SH.lssd();
+    Serial.println();
+}
+void SerialConsole::mnuFileshow(){
+getCommand(2);
+_SH.catfilesd(cmd);
+Serial.println();
+
+}
+void SerialConsole::mnuFiledel(){
+    _Serial.print((char*)infcmd_lst[2]);
+    _Serial.print((char*)infcmd_lst[txt_qstn]);
+    _Serial.print((char*)infcmd_lst[txt_space]);
+    _Serial.println((char*)infcmd_lst[20]);
+    if (ConfirmMenu(0)){
+        getCommand(2);
+        if(_SH.deletefromsd(cmd)){
+        _Serial.print((char*)infcmd_lst[13]);
+        _Serial.println((char*)infcmd_lst[30]);
+        };
+
+    }
+    Serial.println();
+}
+
 void SerialConsole::mnueeprom(){
     switch (getSubCommandindex(1)) {
         case 0:
@@ -230,19 +363,30 @@ void SerialConsole::mnueeprom(){
         case 4:
             mnueepromclear();
             break;
+
+
+
         default:
             _Serial.println((char*)infcmd_lst[1]);
+            _Serial.println((char*)subcmd_lst1[0]);
+            _Serial.println((char*)subcmd_lst1[1]);
+            _Serial.println((char*)subcmd_lst1[2]);
+            _Serial.println((char*)subcmd_lst1[4]);
     }
 }
 
 void SerialConsole::mnueepromdel(){
+    _Serial.print((char*)infcmd_lst[2]);
+    _Serial.print((char*)infcmd_lst[txt_qstn]);
+    _Serial.print((char*)infcmd_lst[txt_space]);
+    _Serial.println((char*)infcmd_lst[20]);
 if (ConfirmMenu(1)){
     getCommand(2);
     _SH.clearEEPROM(atoi(cmd));
     _Serial.print(F("deleted slot: "));
     _Serial.println((char*)cmd);
 }
-
+Serial.println();
 }
 void SerialConsole::mnueepromclear(){
     _Serial.print((char*)infcmd_lst[2]);
@@ -268,7 +412,7 @@ void SerialConsole::mnueepromlist(){
     for(int i =1;i<=SensorMaxCount;i++){
         _SH.getStringFromEEPROM(i,aString);
         if(aString.length()>1){
-            _Serial.print("Slot ");
+            _Serial.print(F("Slot "));
             _Serial.print((String)i);
             _Serial.print(" ");
             _Serial.println(aString);
@@ -276,6 +420,7 @@ void SerialConsole::mnueepromlist(){
     }
     _Serial.print((char*)infcmd_lst[8]);
     _Serial.println((char*)infcmd_lst[30]);
+    Serial.println();
 }
 void SerialConsole::mnueepromadd(){
 getCommand(2);
@@ -286,6 +431,7 @@ getCommand(2);
         _Serial.print((char*)infcmd_lst[13]);
         _Serial.println((char*)infcmd_lst[30]);
         }
+        Serial.println();
 }
 
 
@@ -305,6 +451,9 @@ void SerialConsole::mnuSensor(){
                     break;
                 case 2:
                     mnuSensor_list();
+                    break;
+                case 4:
+                    mnueepromclear();
                     break;
                 case 6:
                     mnusensor_loadfromsd();
@@ -339,7 +488,7 @@ int tmot=20;
             strcat(sens,cmd);
             _Serial.println((char*)sens);
         } else { aborted=true;};
-    }
+    };
     if (!aborted){
         putPrgMemTextInBuffer(2,sensAddMenu);
         if (getTextMenu(pMemBuf,tmot)){
@@ -347,7 +496,7 @@ int tmot=20;
             strcat(sens,cmd);
             _Serial.println((char*)sens);
         } else { aborted=true;};
-    }
+    };
     if (!aborted){
         putPrgMemTextInBuffer(3,sensAddMenu);
         if (getTextMenu(pMemBuf,tmot)){
@@ -355,47 +504,63 @@ int tmot=20;
             strcat(sens,cmd);
             _Serial.println((char*)sens);
         } else { aborted=true;};
-    }
+    };
     if (!aborted){
+
         putPrgMemTextInBuffer(4,sensAddMenu);
         if (getTextMenu(pMemBuf,tmot)){
+
             strcat(sens,",");
             strcat(sens,cmd);
             _Serial.println((char*)sens);
-        } else { aborted=true;};
-    }
+        } else {
+            strcat(sens,",");
+        strcat(sens,"+");
+        _Serial.println((char*)sens);};
+
+
+    };
     if (!aborted){
-        putPrgMemTextInBuffer(5,sensAddMenu);
-        if (getTextMenu(pMemBuf,tmot)){
-            strcat(sens,",");
-            strcat(sens,cmd);
-            _Serial.println((char*)sens);
-        } else { aborted=true;};
-    }
+         putPrgMemTextInBuffer(5,sensAddMenu);
+         if (getTextMenu(pMemBuf,tmot)){
+             strcat(sens,",");
+             strcat(sens,cmd);
+             _Serial.println((char*)sens);
+         } else { strcat(sens,",");
+     strcat(sens,'0');
+     _Serial.println((char*)sens);};
+
+    };
     if (!aborted){
         putPrgMemTextInBuffer(6,sensAddMenu);
         if (getTextMenu(pMemBuf,tmot)){
             strcat(sens,",");
             strcat(sens,cmd);
             _Serial.println((char*)sens);
-        } else { aborted=true;};
-    }
+        } else { strcat(sens,",");
+    strcat(sens,"y");
+    _Serial.println((char*)sens);};
+};
     if (!aborted){
         putPrgMemTextInBuffer(7,sensAddMenu);
         if (getTextMenu(pMemBuf,tmot)){
             strcat(sens,",");
             strcat(sens,cmd);
             _Serial.println((char*)sens);
-        } else { aborted=true;};
-    }
+        } else { strcat(sens,",");
+    strcat(sens,"0");
+    _Serial.println((char*)sens);};
+};
     if (!aborted){
         putPrgMemTextInBuffer(8,sensAddMenu);
         if (getTextMenu(pMemBuf,tmot)){
             strcat(sens,",");
             strcat(sens,cmd);
             _Serial.println((char*)sens);
-        } else { aborted=true;};
-    }
+        } else { strcat(sens,",");
+    strcat(sens,"0");
+    _Serial.println((char*)sens);};
+};
     if (!aborted){
         _Serial.print((char*)infcmd_lst[17]);
         _Serial.print((char*)infcmd_lst[txt_space]);
@@ -415,31 +580,67 @@ int tmot=20;
         } else {
             _Serial.println((char*)infcmd_lst[3]);
         }
-    }
+    };
 }
 
 void SerialConsole::mnuSensor_list(){
-    _Serial.println(F("Sensor:"));
-    _Serial.println(F("Name       Address Function Threshold ThresholdPosNeg Alarmlevel PrintToScreen ForwardSensorAddress ForwardSensorFunction"));
+    _Serial.println(F("Modules:"));
+
+
+    //Serial.println(F("Name       Address Function Threshold ThresholdPosNeg Level PrintToScreen ForwardSensorAddress ForwardSensorFunction"));
+_Serial.print(F("Name"));
+_Serial.print('\t');
+_Serial.print('\t');
+_Serial.print(F("Address"));
+_Serial.print('\t');
+_Serial.print('\t');
+_Serial.print(F("Function"));
+_Serial.print('\t');
+
+_Serial.print(F("Threshold"));
+_Serial.print('\t');
+
+_Serial.print(F("ThresholdPosNeg"));
+_Serial.print('\t');
+
+_Serial.print(F("Value type"));
+_Serial.print('\t');
+
+_Serial.print(F("PrintToScreen"));
+_Serial.print('\t');
+
+_Serial.print(F("ForwardSensorAddress"));
+
+_Serial.print('\t');
+_Serial.println(F("ForwardSensorFunction"));
+
     SensorData aSensordata;
     for(int i = 0;i<_SH.sensorCount();i++){
         aSensordata=_SH._SensorData[i];
     _Serial.print(String(aSensordata.SensorName));
-    _Serial.print((char*)infcmd_lst[16]);
+    _Serial.print('\t');
+    _Serial.print('\t');
     _Serial.print(String(aSensordata.SensorAddress));
-    _Serial.print((char*)infcmd_lst[16]);
+    _Serial.print('\t');
+    _Serial.print('\t');
     _Serial.print(String(aSensordata.SensorFunction));
-    _Serial.print((char*)infcmd_lst[16]);
+    _Serial.print('\t');
+    _Serial.print('\t');
     _Serial.print(String(aSensordata.SensorThreshold));
-    _Serial.print((char*)infcmd_lst[16]);
+    _Serial.print('\t');
+    _Serial.print('\t');
     _Serial.print(String(aSensordata.ThresholdPosNeg));
-    _Serial.print((char*)infcmd_lst[16]);
-    _Serial.print(String(aSensordata.Alarmlevel));
-    _Serial.print((char*)infcmd_lst[16]);;
+    _Serial.print('\t');
+    _Serial.print('\t');
+    _Serial.print(String(aSensordata.Valtype));
+    _Serial.print('\t');
+    _Serial.print('\t');
     _Serial.print(String(aSensordata.PrintToScreen));
-    _Serial.print((char*)infcmd_lst[16]);
+    _Serial.print('\t');
+    _Serial.print('\t');
     _Serial.print(String(aSensordata.ForwardSensorAddress));
-    _Serial.print((char*)infcmd_lst[16]);
+    _Serial.print('\t');
+    _Serial.print('\t');
     _Serial.println(String(aSensordata.ForwardSensorFunction));
 }
 }
@@ -568,8 +769,13 @@ bool SerialConsole::getTextMenu(char* qtxt,int timeoutSec){
       while (_Serial.available() > 0) {
                 aBuf=_Serial.read();
                 if (aBuf=='\r'){
+                    if(c>0){
                 retval= true;
                 break;
+                } else {
+                    retval= false;
+                    break;
+                }
                 } else {
                     cmd[c]=aBuf;
                     cmd[c+1]='\0';
@@ -580,7 +786,7 @@ bool SerialConsole::getTextMenu(char* qtxt,int timeoutSec){
             break;
         }
     }
-    if(!retval){ _Serial.println((char*)infcmd_lst[2]);};
+    if(!retval){ _Serial.println((char*)infcmd_lst[1]);};
     return retval;
 }
 void SerialConsole::txt_reboot(){
@@ -589,7 +795,7 @@ void SerialConsole::txt_reboot(){
     _Serial.print((char*)infcmd_lst[txt_space]);
     _Serial.print((char*)infcmd_lst[23]);
     _Serial.print((char*)infcmd_lst[txt_space]);
-    _Serial.println((char*)infcmd_lst[24]);
+    _Serial.print((char*)infcmd_lst[24]);
     _Serial.print((char*)infcmd_lst[txt_space]);
     _Serial.print((char*)infcmd_lst[25]);
     _Serial.print((char*)infcmd_lst[txt_space]);

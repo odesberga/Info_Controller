@@ -15,7 +15,7 @@ struct SensorData {
     byte SensorFunction=0;
     int16_t SensorThreshold=0;
     char ThresholdPosNeg=0;
-    char Alarmlevel=0;
+    char Valtype=0;
     char PrintToScreen=0;
     byte ForwardSensorAddress=0;
     byte ForwardSensorFunction=0;
@@ -35,14 +35,17 @@ class SensorHandler
     bool saveToEEPROM(char *SensorStr,int len);
     void getStringFromEEPROM(int slot, String &retstring);
     void add(char * SensorStr);
-    SensorData getSensor(uint8_t Address,uint8_t Function);
+    SensorData getSensor(char * sensorname,uint8_t Address,uint8_t Function,int16_t CurrValue);
     int SensorCount=0;
      SensorData _SensorData[SensorMaxCount];
 
      bool savetosd(char* filename);
      bool loadfromsd(char* filename);
+     bool deletefromsd(char* filename);
+     bool lssd();
+     bool catfilesd(char* filename);
   private:
-
+      bool listsd(File dir, int numTabs);
 
 };
 

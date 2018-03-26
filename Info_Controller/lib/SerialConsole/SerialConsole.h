@@ -17,12 +17,14 @@ class SerialConsole
     //void begin(int baud, SensorHandler& sensHand);
     void begin(int baud);
     private:
+        void(* resetFunc) (void) = 0;
         bool ConfirmMenu(int inftxt);
         void getCommand(int pos);
         int getCommandindex(char *lst[],int lstcnt);
         void putPrgMemTextInBuffer(int arrIdx,char *arr[]);
         void PrintpMemBuf();
         void mnuSensor();
+        void mnuReboot();
         void mnusensor_del();
         void mnuSensor_add();
         void mnuSensor_list();
@@ -39,6 +41,13 @@ class SerialConsole
         bool getTextMenu(char* qtxt,int timeoutSec);
         void parseCommand();
         void mnuHelp();
+        void mnuIPset();
+        void mnuIPshow();
+        void mnuIP();
+        void mnuFilelist();
+        void mnuFileshow();
+        void mnuFiledel();
+        void mnuFile();
     int _inMenu=0;
 
 
