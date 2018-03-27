@@ -19,11 +19,6 @@ CF.begin();
 void loop() {
     CF.RefreshFunctions();
     if(CF.gotData()){
-        //CF.ProcessFunctions(CF.func(),CF.setVal(),CF.Val());
-
-
-
-
 
     }
 }

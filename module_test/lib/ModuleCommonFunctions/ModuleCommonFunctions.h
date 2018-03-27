@@ -3,6 +3,8 @@
 #include <SoftwareSerial.h>
 #include <modulemainclass.h>
 #include "modulePotentiometer.h"
+#include "moduleButton.h"
+
 #include <avr/pgmspace.h>
 #include<Arduino.h>
 
@@ -36,7 +38,7 @@ struct funcs {
 };
 
 const funcs Fu0={true,"Potentiometer"};
-const funcs Fu1={false,"Servo"};
+const funcs Fu1={false,"Switch      "};
 
 const funcs FUNCS_Collection[] = {
     Fu0,Fu1

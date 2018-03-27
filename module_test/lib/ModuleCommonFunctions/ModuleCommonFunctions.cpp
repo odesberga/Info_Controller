@@ -56,18 +56,24 @@ void CommonFunctions::CreateFunction(byte PIN,byte func,byte subfunc,byte funcnu
         case 0:
          M[funcCount] = new(modPot);
          M[funcCount]->begin(subfunc, PIN,funcnumb);
-
-
          break;
+         case 1:
+          M[funcCount] = new(modBut);
+          M[funcCount]->begin(subfunc, PIN,funcnumb);
+          break;
     }
 
 }
 void CommonFunctions::printsubc(int func,byte subfunc){
 switch(func) {
     case 0:
-    modPot B;
-    B.printSubfuncs(subfunc);
+    {modPot B;
+    B.printSubfuncs(subfunc);}
      break;
+    case 1:
+    {modBut B;
+    B.printSubfuncs(subfunc);}
+      break;
 }
 
 }
