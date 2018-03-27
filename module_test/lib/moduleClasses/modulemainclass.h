@@ -7,7 +7,7 @@ class module {
 
 public:
 module();
-void begin(int subfunc,int pin, int funcnum);
+virtual void begin(int subfunc,int pin, int funcnum);
 virtual int getVal();
 virtual void setVal(int16_t value);
 virtual void printSubfuncs(byte subfunc);

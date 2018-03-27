@@ -39,11 +39,12 @@ struct funcs {
 
 const funcs Fu0={true,"Potentiometer"};
 const funcs Fu1={false,"Switch      "};
+const funcs Fu2={false,"Servo      "};
 
 const funcs FUNCS_Collection[] = {
-    Fu0,Fu1
+    Fu0,Fu1,Fu2
 };
-#define FUNCS_CollectionCount 2
+#define FUNCS_CollectionCount 3
 
 
 class CommonFunctions {

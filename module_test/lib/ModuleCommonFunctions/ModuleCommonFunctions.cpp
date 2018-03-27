@@ -2,6 +2,9 @@
 #include <SerialCommunication.h>
 #include <modulemainclass.h>
 #include "modulePotentiometer.h"
+#include "moduleServo.h"
+#include "moduleTempSens.h"
+
 //#include <Description.h>
 #include <EEPROM.h>
 #define SofSerialRXPin 10
@@ -61,6 +64,14 @@ void CommonFunctions::CreateFunction(byte PIN,byte func,byte subfunc,byte funcnu
           M[funcCount] = new(modBut);
           M[funcCount]->begin(subfunc, PIN,funcnumb);
           break;
+        case 2:
+         M[funcCount] = new(modServ);
+         M[funcCount]->begin(subfunc, PIN,funcnumb);
+         break;
+         case 3:
+          M[funcCount] = new(modTempSens);
+          M[funcCount]->begin(subfunc, PIN,funcnumb);
+          break;
     }
 
 }
@@ -74,6 +85,14 @@ switch(func) {
     {modBut B;
     B.printSubfuncs(subfunc);}
       break;
+      case 2:
+      {modServ B;
+      B.printSubfuncs(subfunc);}
+        break;
+        case 3:
+        {modTempSens B;
+        B.printSubfuncs(subfunc);}
+          break;
 }
 
 }
@@ -278,7 +297,7 @@ void CommonFunctions::loadFunctionsToRam(){
 int j =0;
 for(int i=1;i<numberOfFunctions+1;i++){
     getFuncFromEEPROM(i);
-    if(funcBuf[0]!=0){
+    if((funcBuf[0]!=0) && (funcBuf[1]!=0)&& (funcBuf[2]!=0)){
         // FunctionList[j][0]=funcBuf[0];
         // FunctionList[j][1]=funcBuf[1];
         // FunctionList[j][2]=funcBuf[2];
@@ -292,7 +311,7 @@ for(int i=1;i<numberOfFunctions+1;i++){
 
 void CommonFunctions::printFunc(int slot){
     getFuncFromEEPROM(slot);
-    if((byte)funcBuf[0] != 0){
+    if((funcBuf[0]!=0) && (funcBuf[1]!=0)&& (funcBuf[2]!=0)){
         Serial.println();
 Serial.print(slot);
 Serial.print('\t');
@@ -321,7 +340,7 @@ funcBuf[3]=EEPROM.read((slot*FuncByteCount)+3);
 void CommonFunctions::saveFunc(){
     bool saved=false;
     for(int i=1;i<numberOfFunctions+1;i++){
-        if(EEPROM.read(i*FuncByteCount)==0){
+        if((EEPROM.read(i*FuncByteCount)==0) && (EEPROM.read((i*FuncByteCount)+1)==0)){
             saveFunctoEEPROM(i);
             Serial.println(F("Done!"));
             saved=true;
