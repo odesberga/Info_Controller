@@ -31,6 +31,7 @@ void modServ::begin(int subfunc,int pin, int funcnum){
   _PIN=pin;
   _subfunc=subfunc;
   _funcnum=funcnum;
+  pinMode(_PIN, OUTPUT);
   myservo.attach(pin);
 
 }

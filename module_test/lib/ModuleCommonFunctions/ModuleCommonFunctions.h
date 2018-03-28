@@ -37,12 +37,13 @@ struct funcs {
     char name[15];
 };
 
-const funcs Fu0={true,"Potentiometer"};
+const funcs Fu0={true,"0-5 Volt (Pot)"};
 const funcs Fu1={false,"Switch      "};
 const funcs Fu2={false,"Servo      "};
-
+const funcs Fu3={false,"Temp      "};
+const funcs Fu4={false,"Relay      "};
 const funcs FUNCS_Collection[] = {
-    Fu0,Fu1,Fu2
+    Fu0,Fu1,Fu2,Fu3,Fu4
 };
 #define FUNCS_CollectionCount 3
 

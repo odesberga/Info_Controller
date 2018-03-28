@@ -22,7 +22,9 @@ int16_t val= analogRead(module::_PIN);
     if (module::_subfunc==3){
         return map(val,0,1023,0,179);
     }
-
+    if (module::_subfunc==4){
+        return (int)val * (5.0 / 1024.0);
+    }
 };
 void modPot::setVal(int16_t value){
 
@@ -47,7 +49,13 @@ void modPot::printSubfuncs(byte subfunc){
     if((all) || (subfunc==3)){
         if(all){Serial.print(F("3:" ));};
     Serial.print(F("map to 180 " ));};
+
+if((all) || (subfunc==4)){
+    if(all){Serial.print(F("4:" ));};
+Serial.print(F("0 - 5 Volt " ));};
 }
+
+
 void modPot::refresh(){
 
 };

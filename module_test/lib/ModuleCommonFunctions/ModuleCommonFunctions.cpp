@@ -4,6 +4,8 @@
 #include "modulePotentiometer.h"
 #include "moduleServo.h"
 #include "moduleTempSens.h"
+#include "moduleRelay.h"
+
 
 //#include <Description.h>
 #include <EEPROM.h>
@@ -72,6 +74,10 @@ void CommonFunctions::CreateFunction(byte PIN,byte func,byte subfunc,byte funcnu
           M[funcCount] = new(modTempSens);
           M[funcCount]->begin(subfunc, PIN,funcnumb);
           break;
+          case 4:
+           M[funcCount] = new(modRel);
+           M[funcCount]->begin(subfunc, PIN,funcnumb);
+           break;
     }
 
 }
@@ -93,6 +99,10 @@ switch(func) {
         {modTempSens B;
         B.printSubfuncs(subfunc);}
           break;
+      case 4:
+      {modRel B;
+      B.printSubfuncs(subfunc);}
+        break;
 }
 
 }

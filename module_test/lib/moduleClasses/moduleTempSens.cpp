@@ -31,7 +31,7 @@ void modTempSens::printSubfuncs(byte subfunc){
     if(subfunc > 4){all=true;};
     if((all) || (subfunc==0)){
         if(all){Serial.print(F("0:" ));};
-    Serial.print(F(" standard 0-180" ));};
+    Serial.print(F(" standard show temp in celsius" ));};
 
 }
 
