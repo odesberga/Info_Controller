@@ -73,8 +73,10 @@ void SensorHandler::add(char * SensorStr){
 
 SensorData SensorHandler::getSensor(char * sensorname,uint8_t Address,uint8_t Function,int16_t CurrValue){
 for (int j =0; j< SensorCount+1;j++){
-    if ((_SensorData[j].SensorName==sensorname) && (_SensorData[j].SensorAddress==Address) && (_SensorData[j].SensorFunction==Function)){
-         _SensorData[j].LastValue=CurrValue;
+    // if ((_SensorData[j].SensorName==sensorname) && (_SensorData[j].SensorAddress==Address) && (_SensorData[j].SensorFunction==Function)){
+    if (_SensorData[j].SensorName==sensorname) {
+         _SensorData[j].LastValue=_SensorData[j].CurrentValue;
+         _SensorData[j].CurrentValue=CurrValue;
         return _SensorData[j];
         break;}
     }

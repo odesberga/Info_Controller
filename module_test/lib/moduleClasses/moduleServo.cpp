@@ -4,34 +4,31 @@
 
 Servo myservo;
 
+modServ::modServ(){
+
+}
+void modServ::begin(int *pin){
+    pinMode(pin, OUTPUT);
+    myservo.attach(pin);
+};
 int modServ::getVal(){
 
 };
-void modServ::setVal(int16_t value){
+
+void modServ::setVal(int16_t value,int *subfunc,int *pin,int *laststate){
+
 myservo.write(value);
+
 };
 
-bool modServ::hasfunc(){
-    return true;
-}
+
 
 void modServ::printSubfuncs(byte subfunc){
     bool all=false;
     if(subfunc > 4){all=true;};
     if((all) || (subfunc==0)){
         if(all){Serial.print(F("0:" ));};
-    Serial.print(F(" standard 0-180" ));};
-
-}
-
-void modServ::refresh(){
-
+    Serial.print(F(" 0-180" ));
 };
-void modServ::begin(int subfunc,int pin, int funcnum){
-  _PIN=pin;
-  _subfunc=subfunc;
-  _funcnum=funcnum;
-  pinMode(_PIN, OUTPUT);
-  myservo.attach(pin);
 
 }

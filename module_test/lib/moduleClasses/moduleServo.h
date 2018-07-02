@@ -1,23 +1,21 @@
 #ifndef moduleServo_h
 #define moduleServo_h
 #include "Arduino.h"
-#include <modulemainclass.h>
 
 
 
-class modServ : public module {
+
+class modServ  {
 public:
+modServ();
+void begin(int *pin);
+ int getVal();
+ void setVal(int16_t value,int *subfunc,int *pin,int *laststate);
+ void printSubfuncs(byte subfunc);
 
-virtual int getVal();
-virtual void setVal(int16_t value);
-virtual bool hasfunc();
-virtual void printSubfuncs(byte subfunc);
-virtual void refresh();
-virtual void begin(int subfunc,int pin, int funcnum);
+
 
 private:
-  int _PIN;
-  int _subfunc;
-  int _funcnum;
+
 };
 #endif

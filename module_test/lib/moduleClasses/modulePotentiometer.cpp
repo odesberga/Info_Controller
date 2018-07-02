@@ -2,37 +2,26 @@
 #include "Arduino.h"
 int16_t lastval;
 
-int modPot::getVal(){
-int16_t val= analogRead(module::_PIN);
+int modPot::getVal(int *subfunc,int *pin){
+int16_t val= analogRead(pin);
 
-// if((v<lastval-8) || (v>lastval+8)) {
-//     lastval=val;
-// } else {
-//     val=lastval;
-// }
-    if (module::_subfunc==0){
+    if (subfunc==0){
          return val;
     }
-    if (module::_subfunc==1){
+    if (subfunc==1){
         return val-1023;
     }
-    if (module::_subfunc==2){
+    if (subfunc==2){
         return map(val,0,1023,0,8);
     }
-    if (module::_subfunc==3){
+    if (subfunc==3){
         return map(val,0,1023,0,179);
     }
-    if (module::_subfunc==4){
+    if (subfunc==4){
         return (int)val * (5.0 / 1024.0);
     }
 };
-void modPot::setVal(int16_t value){
 
-};
-
-bool modPot::hasfunc(){
-    return true;
-}
 
 void modPot::printSubfuncs(byte subfunc){
     bool all=false;
@@ -54,8 +43,3 @@ if((all) || (subfunc==4)){
     if(all){Serial.print(F("4:" ));};
 Serial.print(F("0 - 5 Volt " ));};
 }
-
-
-void modPot::refresh(){
-
-};

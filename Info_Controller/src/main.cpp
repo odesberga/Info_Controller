@@ -27,7 +27,7 @@ int currpage=0;
 int currRow=0;
 
 int pagecount=1;
-#define serial_resv_timeout_ms 30
+#define serial_resv_timeout_ms 100
 
 EthernetServer server(80);
 
@@ -37,14 +37,21 @@ byte mac[] = {
 uint8_t ipaddr[4];
 uint8_t CHIPADDRESS = 1;
 SoftwareSerial mySeria1(A11,A14 );
+SoftwareSerial smsSeria1(16,17);
 SensorHandler SH(3);
 SerialCommunication SC(mySeria1,A12);
+SerialCommunication smsSC(smsSeria1,0);
+
+
 SerialConsole SCLI(Serial);
 int i=0;
 int16_t val=0;
 int lastval=0;
 #define LcdTimeOut 1
 unsigned long lcdrefreshtmout=0;
+#define LcdChangeTimeOut 5
+unsigned long lcdChangerefreshtmout=0;
+
 
 //Prototypes
 //////////////////////////////////////////////////////////////////////////////////
@@ -59,9 +66,13 @@ void readEnc();
 void processSensors();
 void startethernet();
 void webhandle();
+void determinepagecount();
 //////////////////////////////////////////////////////////////////////////////////
 #define outputA A8
 #define outputB A9
+
+
+
 int counter = 0;
 int aState;
 int aLastState;
@@ -73,23 +84,32 @@ void setup() {
 
 
     //Serial.begin(9600);
-    SCLI.begin(9600);
+    SCLI.begin(19200);
     SC.begin(CHIPADDRESS);
+    smsSC.begin(1);
 
-    Serial.println(F("Initializing SD card..."));
-       if (!SD.begin(4)) {
-           Serial.println(F("ERROR - SD card initialization failed!"));
-           return;    // init failed
-       }
     lcd.setBacklightPin(BACKLIGHT_PIN,POSITIVE);
     lcd.setBacklight(HIGH);
     lcd.clear();
     lcd.begin (20,4);
-    lcd.setCursor(1, 0);
+    lcd.setCursor(0, 0);
     lcd.print(F("Welcome!"));
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print(F("Initializing SD card..."));
+    Serial.println(F("Initializing SD card..."));
+       if (!SD.begin(4)) {
+           lcd.setCursor(0, 0);
+           Serial.println(F("ERROR - SD card initialization failed!"));
+            lcd.print(F("ERROR - SD card initialization failed!"));
+            delay(5000);
+            lcd.clear();
+           // return;    // init failed
+       }
     pinMode (outputA,INPUT);
 pinMode (outputB,INPUT);
 startethernet();
+determinepagecount();
 }
 
 void loop() {
@@ -100,44 +120,88 @@ processSensors();
         lcdrefreshtmout=millis();
 }
 readEnc();
-SCLI.refresh(SH);
+if(millis() > lcdChangerefreshtmout+(LcdChangeTimeOut*1000) ){
+    nextPage();
+    lcdChangerefreshtmout=millis();
 }
 
+
+SCLI.refresh(SH);
+}
+void determinepagecount(){
+    int s=0;
+    int c=0;
+    pagecount=0;
+    for(int i =0;i<SH.SensorCount;i++){
+        if(SH._SensorData[i].PrintToScreen='y'){
+            s++;
+        }
+    }
+
+    while(1){
+        if(s>c*4){
+            pagecount++;
+        } else {
+            break;
+        }
+        c++;
+    }
+
+}
 
 
 void processSensors() {
 
     for(int i =0;i<SH.SensorCount;i++){
+            readEnc();
         SC.sendData(SH._SensorData[i].SensorAddress, 'G', SH._SensorData[i].SensorFunction,0);
-        delay(10);
+        // delay(10);
         unsigned long m=millis();
         while (millis()<serial_resv_timeout_ms+m){
+        readEnc();
             if (SC.gotData()){
-                delay(10);
-                SensorData aSensordata=SH.getSensor(SH._SensorData[i].SensorName,SC.resvData.sender_address,SC.resvData.Function,SC.resvData.Value);
+                // delay(10);
+                // SensorData aSensordata=SH.getSensor(SH._SensorData[i].SensorName,SC.resvData.sender_address,SC.resvData.Function,SC.resvData.Value);
+                if(SC.resvData.Function==SH._SensorData[i].SensorFunction){
+                SH._SensorData[i].CurrentValue = SC.resvData.Value;
                 bool forward=false;
                     //Serial.println(SC.resvData.Value);
-
-                if (aSensordata.ForwardSensorAddress > 0) {
-                    if (aSensordata.ThresholdPosNeg=='-') {
-                        if (aSensordata.SensorThreshold<aSensordata.LastValue) {
+                if(SH._SensorData[i].LastValue!=SH._SensorData[i].CurrentValue){
+                    SH._SensorData[i].LastValue =SH._SensorData[i].CurrentValue ;
+                    if (SH._SensorData[i].ForwardSensorAddress > 0) {
+                        if (SH._SensorData[i].ThresholdPosNeg=='-') {
+                            if (SH._SensorData[i].CurrentValue <= SH._SensorData[i].SensorThreshold) {
+                                forward=true;
+                            }
+                        } else {
+                            if (SH._SensorData[i].CurrentValue>= SH._SensorData[i].SensorThreshold) {
                             forward=true;
+                            }
+
+
+                    }
+
+                    if(forward){
+                            if(SH._SensorData[i].ForwardSensorAddress!=128){
+                         SC.sendData(SH._SensorData[i].ForwardSensorAddress, 'S', SH._SensorData[i].ForwardSensorFunction, SH._SensorData[i].CurrentValue);
+                        } else {
+                            smsSC.sendData(2, 'S', SH._SensorData[i].ForwardSensorFunction, SH._SensorData[i].CurrentValue);
+
                         }
                     } else {
-                        if (aSensordata.SensorThreshold>aSensordata.LastValue) {
-                            forward=true;
+                         if(SH._SensorData[i].ForwardSensorAddress!=128){
+                             SC.sendData(SH._SensorData[i].ForwardSensorAddress, 'S', SH._SensorData[i].ForwardSensorFunction, 0);
+                        } else {
+                             smsSC.sendData(2, 'S', SH._SensorData[i].ForwardSensorFunction, -9999);
                         }
-                }
-                if(forward){
-                    delay(10);
-                //    SC.sendData(aSensordata.ForwardSensorAddress, 'S', aSensordata.ForwardSensorFunction, aSensordata.LastValue);
-                }
+                    }
+                };
+
 
             }
             break;
         }
-
-
+        }
         }
     }
 
@@ -145,15 +209,43 @@ void processSensors() {
 
 
 void readEnc(){
-    aState = digitalRead(outputA);
-    if (aState != aLastState){
-      if (digitalRead(outputB) != aState) {
-        nextPage();
+    bool plus=false;
+    bool minus=false;
+
+    // aState = digitalRead(outputA);
+    // if (aState != aLastState){
+    //   if (digitalRead(outputB) != aState) {
+    //     nextPage();
+    //     lcdChangerefreshtmout=millis();
+    //   } else {
+    //     prevPage();
+    //     lcdChangerefreshtmout=millis();
+    //   }
+    // }
+    // aLastState = aState;
+    int n = LOW;
+    n = digitalRead(outputA);
+    if ((aLastState == LOW) && (n == HIGH)) {
+      if (digitalRead(outputB) == LOW) {
+          plus=true;
       } else {
-        prevPage();
+          minus=true;
       }
+      if(plus){
+          nextPage();
+          lcdChangerefreshtmout=millis();
+      };
+      if(minus){
+          prevPage();
+          lcdChangerefreshtmout=millis();
+      };
+
+
     }
-    aLastState = aState;
+    aLastState = n;
+
+
+
   }
 
 
@@ -179,11 +271,17 @@ void printToScreen(int sensidx){
     }
 }
 void nextPage(){
-    if(currpage<pagecount){
+    if(pagecount>1){
+    if(currpage<pagecount-1){
         currpage++;
         lcd.clear();
         lcdrefresh();
-    };
+    } else {
+        currpage=0;
+        lcd.clear();
+        lcdrefresh();
+    }
+}
 }
 
 void prevPage(){
@@ -265,6 +363,7 @@ void webhandle(){
               client.print(F("Module: "));
               client.print(F("&emsp;"));
               client.print(F("&emsp;"));
+              client.print(F("&emsp;"));
               client.print(F("Value: "));
               client.println(F("<br />"));
                 for(int i =0;i<SH.SensorCount;i++){
@@ -272,8 +371,9 @@ void webhandle(){
                         client.print(SH._SensorData[i].SensorName);
                         client.print(F("&emsp;"));
                         client.print(F("&emsp;"));
-                        client.print(F("="));
                         client.print(F("&emsp;"));
+                        client.print(F("="));
+
                         client.print(F("&emsp;"));
                         client.print(SH._SensorData[i].LastValue);
                         if(SH._SensorData[i].Valtype != '0'){
@@ -283,6 +383,36 @@ void webhandle(){
                     }
 
                 }
+                for(int i =0;i<SH.SensorCount;i++){
+                    client.print(F("<pre>"));
+                        client.print(SH._SensorData[i].SensorName);
+client.print(F("    "));
+client.print(F("    "));
+
+                        client.print(SH._SensorData[i].SensorAddress);
+                        client.print(F("    "));
+
+                        client.print(SH._SensorData[i].SensorFunction);
+client.print(F("    "));
+                        client.print(SH._SensorData[i].SensorThreshold);
+client.print(F("    "));
+                        client.print(SH._SensorData[i].ThresholdPosNeg);
+client.print(F("    "));
+                        client.print(SH._SensorData[i].Valtype);
+client.print(F("    "));
+                        client.print(SH._SensorData[i].PrintToScreen);
+client.print(F("    "));
+                        client.print(SH._SensorData[i].ForwardSensorAddress);
+client.print(F("    "));
+                        client.print(SH._SensorData[i].ForwardSensorFunction);
+client.print(F("    "));
+                        client.print(SH._SensorData[i].CurrentValue);
+
+
+client.print(F("</pre>"));
+                    }
+                // }
+
               client.println(F("</html>"));
               break;
             }

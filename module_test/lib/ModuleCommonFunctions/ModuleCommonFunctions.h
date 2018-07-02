@@ -2,8 +2,7 @@
 #define ModuleCommonFunctions_h
 #include <SoftwareSerial.h>
 #include <modulemainclass.h>
-#include "modulePotentiometer.h"
-#include "moduleButton.h"
+
 
 #include <avr/pgmspace.h>
 #include<Arduino.h>
@@ -34,18 +33,18 @@ const pins PINS_Collection[]={
 #define PINS_CollectionCount 12
 struct funcs {
     bool isAnalog;
-    char name[15];
+    char name[8];
 };
 
-const funcs Fu0={true,"0-5 Volt (Pot)"};
-const funcs Fu1={false,"Switch      "};
-const funcs Fu2={false,"Servo      "};
-const funcs Fu3={false,"Temp      "};
-const funcs Fu4={false,"Relay      "};
+const funcs Fu0={true,"0-5 Volt"};
+const funcs Fu1={false,"Switch"};
+const funcs Fu2={false,"Servo "};
+const funcs Fu3={false,"Temp"};
+const funcs Fu4={false,"Relay"};
 const funcs FUNCS_Collection[] = {
     Fu0,Fu1,Fu2,Fu3,Fu4
 };
-#define FUNCS_CollectionCount 3
+#define FUNCS_CollectionCount 5
 
 
 class CommonFunctions {
@@ -59,7 +58,7 @@ public:
     bool setVal();
     int16_t Val();
     bool send(int16_t val);
-    void ProcessFunctions(byte *Function,bool set,int16_t *setval);
+    void ProcessFunctions(byte Function,bool set,int16_t *setval);
     void RefreshFunctions();
 private:
 void(* resetFunc) (void) = 0;

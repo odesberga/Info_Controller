@@ -7,19 +7,20 @@ class module {
 
 public:
 module();
-virtual void begin(int subfunc,int pin, int funcnum);
-virtual int getVal();
-virtual void setVal(int16_t value);
-virtual void printSubfuncs(byte subfunc);
-virtual bool hasfunc();
-virtual void refresh();
-int funcNum();
+ void begin(int *subfunc,int *pin, int *funcnum,int *functype);
+ int getVal();
+ void setVal(int16_t *value);
+ void printSubfuncs(byte *subfunc,int functype);
+ bool hasfunc();
+ void refresh();
+ int funcNum();
 private:
 
 protected:
     int _PIN;
     int _subfunc;
     int _funcnum;
-
+    int _functype;
+    int _lastState;
 };
 #endif

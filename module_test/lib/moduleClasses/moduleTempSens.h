@@ -1,23 +1,16 @@
 #ifndef moduleTempSens_h
 #define moduleTempSens_h
 #include "Arduino.h"
-#include <modulemainclass.h>
 
 
 
-class modTempSens : public module {
+
+class modTempSens {
 public:
 
-virtual int getVal();
-virtual void setVal(int16_t value);
-virtual bool hasfunc();
-virtual void printSubfuncs(byte subfunc);
-virtual void refresh();
-virtual void begin(int subfunc,int pin, int funcnum);
-
+ int getVal(int *subfunc,int *pin);
+ void printSubfuncs(byte subfunc);
 private:
-  int _PIN;
-  int _subfunc;
-  int _funcnum;
+
 };
 #endif

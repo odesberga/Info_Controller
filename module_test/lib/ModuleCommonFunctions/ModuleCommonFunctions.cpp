@@ -1,11 +1,6 @@
 #include <ModuleCommonFunctions.h>
 #include <SerialCommunication.h>
 #include <modulemainclass.h>
-#include "modulePotentiometer.h"
-#include "moduleServo.h"
-#include "moduleTempSens.h"
-#include "moduleRelay.h"
-
 
 //#include <Description.h>
 #include <EEPROM.h>
@@ -18,33 +13,34 @@ char address;
 char pMemBuf[10];
 char commandBuf[5];
 
-#define numberOfFunctions 20
+#define numberOfFunctions 15
 #define FuncByteCount 4
-module* M[numberOfFunctions];
-modPot *pot;
+module M[numberOfFunctions];
+
+// modPot *pot;
 //byte FunctionList[numberOfFunctions][FuncByteCount];
 int funcCount=0;
 char funcBuf[FuncByteCount];
 CommonFunctions::CommonFunctions(){
 };
-// new
-void * operator new (size_t size) { return malloc (size); }
-// placement new
-void * operator new (size_t size, void * ptr) { return ptr; }
-// delete
-void operator delete (void * ptr) { free (ptr); }
 
-void CommonFunctions::ProcessFunctions(byte *Function,bool set,int16_t *setval){
+void CommonFunctions::ProcessFunctions(byte Function,bool set,int16_t *setval){
 
-for(int i=0;i<=funcCount;i++){
-    if(M[i]->funcNum() == Function){
+for(int i=0;i<funcCount;i++){
+ // Serial.println(M[i].funcNum() );
+    if(M[i].funcNum() == Function){
+         // Serial.println(set);
+
         if(set){
         // if(SC.resvData.GetOrSet=='S'){
-            M[i]->setVal(setval);
+            M[i].setVal(setval);
+            // Serial.println((int)setval);
         } else {
+            // Serial.print(Function);
+            // Serial.print("  ");
+            // Serial.println(M[i].getVal());
+            SC.sendData(SC.resvData.sender_address, 'S', Function, M[i].getVal());
 
-            SC.sendData(SC.resvData.sender_address, 'S', Function, M[i]->getVal());
-        //    Serial.println(M[i]->getVal());
             break;
         }
     }
@@ -52,67 +48,33 @@ for(int i=0;i<=funcCount;i++){
 }
 void CommonFunctions::RefreshFunctions(){
     for(int i=0;i<funcCount;i++){
-                M[i]->refresh();
+                M[i].refresh();
 
     }
 }
 void CommonFunctions::CreateFunction(byte PIN,byte func,byte subfunc,byte funcnumb){
-    switch(func)    {
-        case 0:
-         M[funcCount] = new(modPot);
-         M[funcCount]->begin(subfunc, PIN,funcnumb);
-         break;
-         case 1:
-          M[funcCount] = new(modBut);
-          M[funcCount]->begin(subfunc, PIN,funcnumb);
-          break;
-        case 2:
-         M[funcCount] = new(modServ);
-         M[funcCount]->begin(subfunc, PIN,funcnumb);
-         break;
-         case 3:
-          M[funcCount] = new(modTempSens);
-          M[funcCount]->begin(subfunc, PIN,funcnumb);
-          break;
-          case 4:
-           M[funcCount] = new(modRel);
-           M[funcCount]->begin(subfunc, PIN,funcnumb);
-           break;
-    }
+
+M[funcCount].begin(subfunc, PIN,funcnumb,func);
 
 }
 void CommonFunctions::printsubc(int func,byte subfunc){
-switch(func) {
-    case 0:
-    {modPot B;
-    B.printSubfuncs(subfunc);}
-     break;
-    case 1:
-    {modBut B;
-    B.printSubfuncs(subfunc);}
-      break;
-      case 2:
-      {modServ B;
-      B.printSubfuncs(subfunc);}
-        break;
-        case 3:
-        {modTempSens B;
-        B.printSubfuncs(subfunc);}
-          break;
-      case 4:
-      {modRel B;
-      B.printSubfuncs(subfunc);}
-        break;
-}
-
+module mod;
+mod.printSubfuncs(subfunc,func);
 }
 
 
 void CommonFunctions::begin(){
-
+for(int i =0;i<PINS_CollectionCount;i++){
+    pinMode(PINS_Collection[i].pin, OUTPUT);
+    digitalWrite(PINS_Collection[i].pin,1);
+}
 SC.begin(loadAddress());
 Serial.print(F("Current address = "));
 Serial.print(SC.ownAddress());
+Serial.println();
+if(SC.ownAddress()==127){
+    Serial.println(F("Clearing memory: "));
+    clearFunc();};
 loadFunctionsToRam();
 help();
 };
@@ -122,8 +84,6 @@ bool CommonFunctions::gotData(){
         SerialMenu();
     }
     if(SC.gotData()){
-
-    ProcessFunctions(func(),setVal(),Val());
     return true;
     } else {
     return false;
@@ -303,16 +263,15 @@ void CommonFunctions::printAllFunc(){
     };
 };
 void CommonFunctions::loadFunctionsToRam(){
-//memset(FunctionList,0,sizeof(FunctionList[0][0]) * numberOfFunctions *FuncByteCount);
+
 int j =0;
 for(int i=1;i<numberOfFunctions+1;i++){
+
     getFuncFromEEPROM(i);
-    if((funcBuf[0]!=0) && (funcBuf[1]!=0)&& (funcBuf[2]!=0)){
-        // FunctionList[j][0]=funcBuf[0];
-        // FunctionList[j][1]=funcBuf[1];
-        // FunctionList[j][2]=funcBuf[2];
-        // FunctionList[j][3]=funcBuf[3];
-            CreateFunction(PINS_Collection[(byte)funcBuf[0]].pin ,(byte)funcBuf[1],(byte*)funcBuf[2],(byte*)funcBuf[3]);
+
+    if((byte)funcBuf[3]!=0){
+
+            CreateFunction(PINS_Collection[(byte)funcBuf[0]].pin ,(byte)funcBuf[1],(byte)funcBuf[2],(byte)funcBuf[3]);
         funcCount++;
     }
 };
@@ -321,7 +280,7 @@ for(int i=1;i<numberOfFunctions+1;i++){
 
 void CommonFunctions::printFunc(int slot){
     getFuncFromEEPROM(slot);
-    if((funcBuf[0]!=0) && (funcBuf[1]!=0)&& (funcBuf[2]!=0)){
+    if(funcBuf[3]!=0){
         Serial.println();
 Serial.print(slot);
 Serial.print('\t');
@@ -350,11 +309,13 @@ funcBuf[3]=EEPROM.read((slot*FuncByteCount)+3);
 void CommonFunctions::saveFunc(){
     bool saved=false;
     for(int i=1;i<numberOfFunctions+1;i++){
-        if((EEPROM.read(i*FuncByteCount)==0) && (EEPROM.read((i*FuncByteCount)+1)==0)){
+        if(EEPROM.read((i*FuncByteCount)+3)==0) {
+            if(EEPROM.read((i*FuncByteCount)+1)==0){
             saveFunctoEEPROM(i);
             Serial.println(F("Done!"));
             saved=true;
             break;
+            };
         };
     };
 if(!saved){

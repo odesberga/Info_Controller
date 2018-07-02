@@ -20,6 +20,7 @@ struct SensorData {
     byte ForwardSensorAddress=0;
     byte ForwardSensorFunction=0;
     int16_t LastValue=0;
+    int16_t CurrentValue=0;
 };
 
 

@@ -84,8 +84,8 @@ const char sensAddMenu_string_3[] PROGMEM = "Enter forwarding threshold";
 const char sensAddMenu_string_4[] PROGMEM = "Enter forwarding threshold Over/Under [+/-]";
 const char sensAddMenu_string_5[] PROGMEM = "Enter Value type eg V for Volt, C for celsius or P for pascal";
 const char sensAddMenu_string_6[] PROGMEM = "Print to screen [y/n]";
-const char sensAddMenu_string_7[] PROGMEM = "Enter address to forwarding module [0-100] 0 = n/a";
-const char sensAddMenu_string_8[] PROGMEM = "Enter function on forwarding function 0 = n/a";
+const char sensAddMenu_string_7[] PROGMEM = "Enter address to forwarding module [0-100]. 0 = n/a 128 = SMS";
+const char sensAddMenu_string_8[] PROGMEM = "Enter function on forwarding function. 0 = n/a";
 const char sensAddMenu_string_9[] PROGMEM = "";
 const char* const sensAddMenu[] PROGMEM = {
 sensAddMenu_string_0,sensAddMenu_string_1,sensAddMenu_string_2,sensAddMenu_string_3,sensAddMenu_string_4,sensAddMenu_string_5,

@@ -1,19 +1,20 @@
 #ifndef modulePotentiometer_h
 #define modulePotentiometer_h
 #include "Arduino.h"
-#include <modulemainclass.h>
 
 
 
-class modPot : public module {
+class modPot   {
 public:
 
-virtual int getVal();
-virtual void setVal(int16_t value);
-virtual bool hasfunc();
-virtual void printSubfuncs(byte subfunc);
-virtual void refresh();
+ int getVal(int *subfunc,int *pin);
+ void printSubfuncs(byte subfunc);
+
 private:
+protected:
+
 
 };
+
+
 #endif

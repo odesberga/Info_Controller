@@ -1,23 +1,18 @@
 #ifndef moduleRelay_h
 #define moduleRelay_h
 #include "Arduino.h"
-#include <modulemainclass.h>
 
 
 
-class modRel : public module {
+
+class modRel {
 public:
 
-virtual int getVal();
-virtual void setVal(int16_t value);
-virtual bool hasfunc();
-virtual void printSubfuncs(byte subfunc);
-virtual void refresh();
-virtual void begin(int subfunc,int pin, int funcnum);
+ int getVal(int *subfunc,int *pin);
+ void setVal(int16_t value,int *subfunc,int *pin,int *laststate);
+ void printSubfuncs(byte subfunc);
 
-private:
-  int _PIN;
-  int _subfunc;
-  int _funcnum;
+
+
 };
 #endif
