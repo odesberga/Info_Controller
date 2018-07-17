@@ -5,7 +5,7 @@
 #include <SD.h>
 #define byte uint8_t
 #define NameLength 10
-#define SensorMaxCount 100
+#define SensorMaxCount 200
 #define EEslotlength NameLength + 20
 #define EEslotTotallength NameLength + 20 *SensorMaxCount
 
@@ -16,7 +16,7 @@ struct SensorData {
     int16_t minSensorThreshold=0;
     int16_t maxSensorThreshold=0;
     //char ThresholdPosNeg=0;
-//    char Valtype=0;
+    char Valtype=0;
     char PrintToScreen=0;
     byte ForwardSensorAddress=0;
     byte ForwardSensorFunction=0;

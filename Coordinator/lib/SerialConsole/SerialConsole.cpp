@@ -56,7 +56,7 @@ const char cmd4[]  ="debug";
 const char cmd5[]  ="reboot";
 const char cmd6[]  ="help";
 const char cmd7[]  ="eeprom";
-const char cmd7[]  ="P";
+const char cmd8[]  ="P";
 const char*  cmd_lst[]  = {
     cmd1,cmd2,cmd3,cmd4,cmd5,cmd6,cmd7,cmd8
 };
@@ -77,20 +77,19 @@ const char*  subcmd_lst1[] = {
     subcmd1,subcmd2,subcmd3,subcmd4,subcmd5,subcmd6,subcmd7,subcmd8,subcmd9
 };
 #define subcmd_count 8
-
 const char sensAddMenu_string_0[] PROGMEM = "Enter Name";
 const char sensAddMenu_string_1[] PROGMEM = "Enter Address";
 const char sensAddMenu_string_2[] PROGMEM = "Enter Function";
-const char sensAddMenu_string_3[] PROGMEM = "Enter forwarding threshold";
-const char sensAddMenu_string_4[] PROGMEM = "Enter forwarding threshold Over/Under [+/-]";
-const char sensAddMenu_string_5[] PROGMEM = "Enter Value type eg V for Volt, C for celsius or P for pascal";
-const char sensAddMenu_string_6[] PROGMEM = "Print to screen [y/n]";
-const char sensAddMenu_string_7[] PROGMEM = "Enter address to forwarding module [0-100]. 0 = n/a 128 = SMS";
-const char sensAddMenu_string_8[] PROGMEM = "Enter function on forwarding function. 0 = n/a";
+const char sensAddMenu_string_3[] PROGMEM = "Enter address to forwarding module [0-100]. 0 = n/a 128 = SMS";
+const char sensAddMenu_string_4[] PROGMEM = "Enter function on forwarding module. 0 = n/a";
+const char sensAddMenu_string_5[] PROGMEM = "Enter low threshold";
+const char sensAddMenu_string_6[] PROGMEM = "Enter high threshold";
+const char sensAddMenu_string_7[] PROGMEM = "Enter Value type eg V for Volt, C for celsius or P for pascal";
+const char sensAddMenu_string_8[] PROGMEM = "Print to screen [y/n]";
 const char sensAddMenu_string_9[] PROGMEM = "";
 const char* const sensAddMenu[] PROGMEM = {
 sensAddMenu_string_0,sensAddMenu_string_1,sensAddMenu_string_2,sensAddMenu_string_3,sensAddMenu_string_4,sensAddMenu_string_5,
-sensAddMenu_string_6,sensAddMenu_string_7,sensAddMenu_string_8,sensAddMenu_string_9
+sensAddMenu_string_6,sensAddMenu_string_7,sensAddMenu_string_8
 };
 
 
@@ -127,7 +126,7 @@ bool debug=true;
 //SensorHandler _SH(3);
 
 
-SerialConsole::SerialConsole(HardwareSerial& serial,SensorHandler& SH): _Serial(serial) _SH(SH){
+SerialConsole::SerialConsole(HardwareSerial& serial,SensorHandler& SH): _Serial(serial), _SH(SH){
 }
 void SerialConsole::begin(int baud){
     _Serial.begin(baud);
@@ -230,9 +229,6 @@ int cmdidx=getCommandindex(cmd_lst,cmd_lst_count);
                 mnuHelp();
                 break;
             case 6:
-                mnueeprom();
-                break;
-            case 7:
                 mnueeprom();
                 break;
         }
@@ -513,16 +509,10 @@ int tmot=20;
 
         putPrgMemTextInBuffer(4,sensAddMenu);
         if (getTextMenu(pMemBuf,tmot)){
-
             strcat(sens,",");
             strcat(sens,cmd);
             _Serial.println((char*)sens);
-        } else {
-            strcat(sens,",");
-        strcat(sens,"+");
-        _Serial.println((char*)sens);};
-
-
+        } else { aborted=true;};
     };
     if (!aborted){
          putPrgMemTextInBuffer(5,sensAddMenu);
@@ -531,7 +521,7 @@ int tmot=20;
              strcat(sens,cmd);
              _Serial.println((char*)sens);
          } else { strcat(sens,",");
-     strcat(sens,'0');
+     strcat(sens,'-999');
      _Serial.println((char*)sens);};
 
     };
@@ -542,7 +532,7 @@ int tmot=20;
             strcat(sens,cmd);
             _Serial.println((char*)sens);
         } else { strcat(sens,",");
-    strcat(sens,"y");
+    strcat(sens,"1000");
     _Serial.println((char*)sens);};
 };
     if (!aborted){
@@ -589,9 +579,6 @@ int tmot=20;
 
 void SerialConsole::mnuSensor_list(){
     _Serial.println(F("Modules:"));
-
-
-    //Serial.println(F("Name       Address Function Threshold ThresholdPosNeg Level PrintToScreen ForwardSensorAddress ForwardSensorFunction"));
 _Serial.print(F("Name"));
 _Serial.print('\t');
 _Serial.print('\t');
@@ -612,9 +599,7 @@ _Serial.print('\t');
 
 _Serial.print(F("PrintToScreen"));
 _Serial.print('\t');
-
 _Serial.print(F("ForwardSensorAddress"));
-
 _Serial.print('\t');
 _Serial.println(F("ForwardSensorFunction"));
 
@@ -630,10 +615,10 @@ _Serial.println(F("ForwardSensorFunction"));
     _Serial.print(String(aSensordata.SensorFunction));
     _Serial.print('\t');
     _Serial.print('\t');
-    _Serial.print(String(aSensordata.SensorThreshold));
+    _Serial.print(String(aSensordata.minSensorThreshold));
     _Serial.print('\t');
     _Serial.print('\t');
-    _Serial.print(String(aSensordata.ThresholdPosNeg));
+    _Serial.print(String(aSensordata.maxSensorThreshold));
     _Serial.print('\t');
     _Serial.print('\t');
     _Serial.print(String(aSensordata.Valtype));
