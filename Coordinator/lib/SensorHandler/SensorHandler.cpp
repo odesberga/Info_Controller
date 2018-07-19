@@ -184,8 +184,6 @@ bool SensorHandler::saveToEEPROM(char *SensorStr,int len){
             for(int i =0;i < len+1;i++){
                 tmp=writeaddr+i;
                 EEPROM.write(tmp, SensorStr[i]);
-
-                //writeaddr++;
             }
             saved=true;
             break;

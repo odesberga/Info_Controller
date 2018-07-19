@@ -4,6 +4,7 @@
 
 /////////////////////////////////////// info text //////////////////////////////////////
 
+
 const char icmd0[]  = "";
 const char icmd1[]  = "Unknown Command!";
 const char icmd2[]  = "Really";
@@ -56,7 +57,7 @@ const char cmd4[]  ="debug";
 const char cmd5[]  ="reboot";
 const char cmd6[]  ="help";
 const char cmd7[]  ="eeprom";
-const char cmd8[]  ="P";
+const char cmd8[]  ="forward";
 const char*  cmd_lst[]  = {
     cmd1,cmd2,cmd3,cmd4,cmd5,cmd6,cmd7,cmd8
 };
@@ -178,7 +179,7 @@ void SerialConsole::refresh(SensorHandler &SH){
 
         if (newdata){
 
-        _SH=SH;
+        //_SH=SH;
             parseCommand();
         }
     //}
@@ -231,6 +232,9 @@ int cmdidx=getCommandindex(cmd_lst,cmd_lst_count);
             case 6:
                 mnueeprom();
                 break;
+            case 7:
+                mnuForward();
+                break;
         }
 
     } else {
@@ -238,7 +242,19 @@ int cmdidx=getCommandindex(cmd_lst,cmd_lst_count);
     }
 }
 
-
+void SerialConsole::mnuForward(){
+    ForwardMessage=emptyForwardMessage;
+    getCommand(1);
+    ForwardMessage.code=cmd[0];
+    getCommand(2);
+    ForwardMessage.destAddress=atoi(cmd);
+    getCommand(3);
+    ForwardMessage.Function==atoi(cmd);
+    getCommand(4);
+    ForwardMessage.firstVal=atoi(cmd);
+    getCommand(5);
+    ForwardMessage.secVal==atoi(cmd);
+}
 void SerialConsole::mnuIP(){
     switch (getSubCommandindex(1)) {
 

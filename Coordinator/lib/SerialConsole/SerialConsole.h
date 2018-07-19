@@ -5,11 +5,20 @@
 #include <avr/pgmspace.h>
 #include<Arduino.h>
 
+struct sData {
+    byte destAddress=0;
+    char code=0;
+    byte Function=0;
+    byte firstVal=0;
+    byte secVal=0;
+};
+
 class SerialConsole
 {
 
   public:
-
+    sData ForwardMessage;
+    sData emptyForwardMessage;
     SerialConsole(HardwareSerial& serial,SensorHandler& SH);
     HardwareSerial&  _Serial;
     SensorHandler& _SH;
@@ -49,6 +58,7 @@ class SerialConsole
         void mnuFileshow();
         void mnuFiledel();
         void mnuFile();
+        void mnuForward();
     int _inMenu=0;
 
 
