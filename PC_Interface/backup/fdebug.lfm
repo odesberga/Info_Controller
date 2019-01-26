@@ -1,0 +1,9 @@
+object Form_debug: TForm_debug
+  Left = 3840
+  Height = 262
+  Top = 87
+  Width = 421
+  Caption = 'Form_debug'
+  OnCreate = FormCreate
+  LCLVersion = '1.8.2.0'
+end

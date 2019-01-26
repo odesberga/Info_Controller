@@ -1,0 +1,20 @@
+object DataModule1: TDataModule1
+  OldCreateOrder = False
+  Height = 158
+  HorizontalOffset = 1713
+  VerticalOffset = 500
+  Width = 175
+  PPI = 96
+  object SdpoSerial1: TSdpoSerial
+    Active = False
+    BaudRate = br___300
+    AltBaudRate = 0
+    DataBits = db8bits
+    Parity = pNone
+    FlowControl = fcNone
+    StopBits = sbOne
+    Device = '/dev/ttyS0'
+    left = 40
+    top = 16
+  end
+end
